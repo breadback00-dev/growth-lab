@@ -1,0 +1,36 @@
+{
+  "name": "growth-lab",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A demo-first online growth command center for a small arts retail brand.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "lucide-react": "^1.17.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.16",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "jsdom": "^29.1.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/breadback00-dev/growth-lab.git"
+  },
+  "bugs": {
+    "url": "https://github.com/breadback00-dev/growth-lab/issues"
+  },
+  "homepage": "https://github.com/breadback00-dev/growth-lab#readme"
+}

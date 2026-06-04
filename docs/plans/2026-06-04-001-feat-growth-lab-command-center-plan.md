@@ -1,7 +1,7 @@
 ---
 title: Growth Lab Command Center Plan
 type: feat
-status: active
+status: completed
 date: 2026-06-04
 ---
 

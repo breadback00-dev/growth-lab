@@ -33,4 +33,20 @@ docs/04-architecture.md
 
 This project should start as a demo-first local web app with realistic mocked data. Real integrations can be added later for commerce, analytics, ads, social, and email platforms after the core workflows are strong.
 
-No install, dev, test, lint, or build commands exist yet. The first implementation unit should create the app scaffold and then update this README with the actual commands.
+## Commands
+
+```powershell
+npm install
+npm run dev
+npm test
+npm run build
+npm run preview
+```
+
+## Local App
+
+The Vite dev server prints the local URL when `npm run dev` starts. The default is usually:
+
+```text
+http://localhost:5173
+```

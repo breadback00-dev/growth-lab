@@ -5,9 +5,10 @@ import type { Campaign, PlanMonth } from "../types";
 interface PlanPageProps {
   campaigns: Campaign[];
   months: PlanMonth[];
+  onUpdateMonth: (phase: string, updates: Partial<PlanMonth>) => void;
 }
 
-export default function PlanPage({ campaigns, months }: PlanPageProps) {
+export default function PlanPage({ campaigns, months, onUpdateMonth }: PlanPageProps) {
   return (
     <div className="page-stack">
       <header className="page-header">
@@ -40,6 +41,54 @@ export default function PlanPage({ campaigns, months }: PlanPageProps) {
                 <li key={deliverable}>{deliverable}</li>
               ))}
             </ul>
+            <details className="inline-editor">
+              <summary>Edit month</summary>
+              <label>
+                Focus
+                <textarea
+                  value={month.focus}
+                  onChange={(event) =>
+                    onUpdateMonth(month.phase, { focus: event.target.value })
+                  }
+                />
+              </label>
+              <label>
+                Budget
+                <input
+                  min="0"
+                  type="number"
+                  value={month.budget}
+                  onChange={(event) =>
+                    onUpdateMonth(month.phase, { budget: Number(event.target.value) })
+                  }
+                />
+              </label>
+              <label>
+                Checkpoint
+                <input
+                  value={month.checkpoint ?? ""}
+                  onChange={(event) =>
+                    onUpdateMonth(month.phase, {
+                      checkpoint: event.target.value || undefined
+                    })
+                  }
+                />
+              </label>
+              <label>
+                Deliverables
+                <textarea
+                  value={month.deliverables.join("\n")}
+                  onChange={(event) =>
+                    onUpdateMonth(month.phase, {
+                      deliverables: event.target.value
+                        .split("\n")
+                        .map((item) => item.trim())
+                        .filter(Boolean)
+                    })
+                  }
+                />
+              </label>
+            </details>
           </article>
         ))}
       </section>

@@ -10,6 +10,7 @@ export type ChannelType = "organic" | "paid" | "email" | "retail";
 export type ExperimentStatus = "planned" | "running" | "complete";
 export type NextAction = "launch" | "scale" | "iterate" | "stop";
 export type Confidence = "low" | "medium" | "high";
+export type CopyOutputType = "caption" | "emailSubject" | "paidHook" | "bundleIdea";
 
 export interface BrandProfile {
   name: string;
@@ -94,4 +95,10 @@ export interface PlanMonth {
   budget: number;
   deliverables: string[];
   checkpoint?: string;
+}
+
+export interface GrowthLabState {
+  monthlySales: MonthlySales[];
+  planMonths: PlanMonth[];
+  experiments: Experiment[];
 }

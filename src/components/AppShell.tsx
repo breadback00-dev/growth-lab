@@ -26,13 +26,15 @@ interface AppShellProps {
   brand: BrandProfile;
   children: React.ReactNode;
   onNavigate: (page: PageId) => void;
+  onReset: () => void;
 }
 
 export default function AppShell({
   activePage,
   brand,
   children,
-  onNavigate
+  onNavigate,
+  onReset
 }: AppShellProps) {
   return (
     <div className="app-shell">
@@ -69,6 +71,9 @@ export default function AppShell({
           <p className="eyebrow">Operating constraint</p>
           <strong>One day per week</strong>
           <span>Keep every test simple enough to run, measure, and decide.</span>
+          <button className="secondary-button" onClick={onReset} type="button">
+            Reset demo state
+          </button>
         </div>
       </aside>
 

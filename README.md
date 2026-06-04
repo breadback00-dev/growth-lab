@@ -50,3 +50,13 @@ The Vite dev server prints the local URL when `npm run dev` starts. The default 
 ```text
 http://localhost:5173
 ```
+
+## Preview Deployment
+
+GitHub Pages is configured through `.github/workflows/pages.yml`. After Pages is enabled for the private repository, pushes to `main` build, test, and deploy the app.
+
+Expected preview URL:
+
+```text
+https://breadback00-dev.github.io/growth-lab/
+```

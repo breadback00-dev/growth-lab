@@ -37,8 +37,30 @@ textarea {
   font: inherit;
 }
 
+input,
+select,
+textarea {
+  background: #fffdf8;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  min-height: 40px;
+  padding: 9px 10px;
+  width: 100%;
+}
+
+textarea {
+  line-height: 1.4;
+  min-height: 92px;
+  resize: vertical;
+}
+
 button:focus-visible,
-a:focus-visible {
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
   outline: 3px solid #315f80;
   outline-offset: 3px;
 }
@@ -149,6 +171,40 @@ a:focus-visible {
   line-height: 1.45;
 }
 
+.primary-button,
+.secondary-button {
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 38px;
+  padding: 8px 12px;
+  transition: transform 140ms ease, background 140ms ease;
+}
+
+.primary-button:hover,
+.secondary-button:hover {
+  transform: translateY(-1px);
+}
+
+.primary-button {
+  background: var(--green);
+  border: 1px solid var(--green);
+  color: #fffaf0;
+}
+
+.primary-button:disabled {
+  background: #b7b9b0;
+  border-color: #b7b9b0;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.secondary-button {
+  background: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+}
+
 .main-surface {
   padding: 28px;
 }
@@ -208,6 +264,18 @@ a:focus-visible {
   font-size: 1.25rem;
 }
 
+.header-panel label,
+.form-grid label,
+.inline-editor label {
+  color: var(--muted);
+  display: grid;
+  font-size: 0.78rem;
+  font-weight: 800;
+  gap: 7px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .section-block {
   display: grid;
   gap: 18px;
@@ -219,6 +287,13 @@ a:focus-visible {
   display: flex;
   gap: 16px;
   justify-content: space-between;
+}
+
+.button-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .section-heading h2 {
@@ -452,6 +527,23 @@ a:focus-visible {
   margin: 6px 0;
 }
 
+.inline-editor {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.inline-editor summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.inline-editor[open] {
+  gap: 12px;
+}
+
 .kanban {
   display: grid;
   gap: 14px;
@@ -579,6 +671,41 @@ a:focus-visible {
   color: #375568;
 }
 
+.form-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.wide-field {
+  grid-column: 1 / -1;
+}
+
+.csv-input {
+  min-height: 150px;
+}
+
+.helper-text {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.error-list {
+  background: var(--red-soft);
+  border: 1px solid #ddb1aa;
+  border-radius: var(--radius);
+  color: var(--red);
+  margin: 0;
+  padding: 12px 12px 12px 28px;
+}
+
+.variant-list {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .recommendation-row {
   display: grid;
   gap: 18px;
@@ -620,7 +747,9 @@ a:focus-visible {
   .two-column,
   .metric-grid,
   .audience-grid,
-  .creative-grid {
+  .creative-grid,
+  .form-grid,
+  .variant-list {
     grid-template-columns: 1fr;
   }
 

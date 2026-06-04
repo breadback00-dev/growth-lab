@@ -46,6 +46,10 @@ export function summarizeSales(months: MonthlySales[]) {
   };
 }
 
+export function selectSalesMonth(months: MonthlySales[], monthName: string): MonthlySales {
+  return months.find((month) => month.month === monthName) ?? months[months.length - 1];
+}
+
 export function formatMoney(value: number): string {
   return `GBP ${Math.round(value).toLocaleString("en-GB")}`;
 }

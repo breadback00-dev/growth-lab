@@ -3,13 +3,14 @@ import type { MonthlySales } from "../types";
 import MetricTile from "./MetricTile";
 
 interface GrowthSummaryProps {
+  selectedMonth: MonthlySales;
   sales: MonthlySales[];
 }
 
-export default function GrowthSummary({ sales }: GrowthSummaryProps) {
+export default function GrowthSummary({ selectedMonth, sales }: GrowthSummaryProps) {
   const summary = summarizeSales(sales);
-  const latest = summary.latest;
-  const growth = summary.latestGrowth;
+  const latest = selectedMonth;
+  const growth = calculateGrowth(latest);
   const december = sales.find((month) => month.isSeasonalPeak);
   const decemberGrowth = december ? calculateGrowth(december) : null;
 

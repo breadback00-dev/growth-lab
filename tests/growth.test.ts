@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateGrowth, summarizeSales } from "../src/domain/growth";
+import { calculateGrowth, selectSalesMonth, summarizeSales } from "../src/domain/growth";
 import { monthlySales } from "../src/data/demoData";
 
 describe("calculateGrowth", () => {
@@ -39,5 +39,15 @@ describe("summarizeSales", () => {
     const summary = summarizeSales(monthlySales);
 
     expect(summary.seasonalAverage).toBeGreaterThan(summary.nonSeasonalAverage * 3);
+  });
+});
+
+describe("selectSalesMonth", () => {
+  it("returns the requested month when present", () => {
+    expect(selectSalesMonth(monthlySales, "December").isSeasonalPeak).toBe(true);
+  });
+
+  it("falls back to the latest month when the requested month is absent", () => {
+    expect(selectSalesMonth(monthlySales, "Nope").month).toBe("December");
   });
 });

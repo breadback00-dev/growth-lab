@@ -154,6 +154,19 @@ Before finishing, choose relevant checks:
 
 If verification cannot run, say exactly why and what remains unverified.
 
+### Verification Cadence
+
+Do not run the full test/build/browser loop after every small edit. Batch work into a meaningful slice first, then verify.
+
+Use this rhythm by default:
+
+- During implementation: rely on reading, type-aware edits, and focused checks only when they answer a real uncertainty.
+- After a coherent slice: run the smallest relevant focused test or browser check.
+- Before commit, PR, merge, or deployment: run full required verification such as `npm test`, `npm run build`, and one browser/manual QA pass for UI work.
+- Retest early only when a prior check failed, TypeScript/API shape is uncertain, or the change touches build, deployment, persistence, or other high-risk behavior.
+
+Avoid anxious verification churn. Tests should mark real confidence gates, not every tiny iteration.
+
 ## Durable Learning
 
 If the same kind of correction happens repeatedly, improve the source instruction, template, test, or helper instead of patching the output every time.

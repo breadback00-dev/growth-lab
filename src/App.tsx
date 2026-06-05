@@ -6,6 +6,7 @@ import {
   campaigns,
   creativeAssets,
 } from "./data/demoData";
+import { buildCheckpointScorecards } from "./domain/planning";
 import { buildWeeklyActions, generateWeeklyRecommendations } from "./domain/recommendations";
 import AudiencesPage from "./pages/AudiencesPage";
 import CreativePage from "./pages/CreativePage";
@@ -42,6 +43,16 @@ export default function App() {
     () => buildWeeklyActions(recommendations, state.weeklyActions),
     [recommendations, state.weeklyActions]
   );
+  const checkpointScorecards = useMemo(
+    () =>
+      buildCheckpointScorecards({
+        months: state.planMonths,
+        campaigns,
+        experiments: state.experiments,
+        sales: state.monthlySales
+      }),
+    [state.experiments, state.monthlySales, state.planMonths]
+  );
 
   const pages: Record<PageId, React.ReactNode> = {
     dashboard: (
@@ -55,7 +66,14 @@ export default function App() {
         onSetWeeklyActionStatus={setWeeklyActionStatus}
       />
     ),
-    plan: <PlanPage campaigns={campaigns} months={state.planMonths} onUpdateMonth={updatePlanMonth} />,
+    plan: (
+      <PlanPage
+        campaigns={campaigns}
+        checkpointScorecards={checkpointScorecards}
+        months={state.planMonths}
+        onUpdateMonth={updatePlanMonth}
+      />
+    ),
     experiments: (
       <ExperimentsPage
         audiences={audiences}

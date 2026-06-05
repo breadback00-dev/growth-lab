@@ -119,6 +119,24 @@ export interface PlanMonth {
   checkpoint?: string;
 }
 
+export type CheckpointRecommendation = "scale" | "iterate" | "pause";
+
+export interface CheckpointScorecard {
+  phase: string;
+  checkpoint: string;
+  salesMonth: string;
+  thresholdProgressPercent: number;
+  currentRevenue: number;
+  thresholdRevenue: number;
+  organicSpend: number;
+  paidSpend: number;
+  organicExperiments: number;
+  paidExperiments: number;
+  decisionCounts: Record<NextAction, number>;
+  recommendation: CheckpointRecommendation;
+  summary: string;
+}
+
 export interface GrowthLabState {
   monthlySales: MonthlySales[];
   planMonths: PlanMonth[];

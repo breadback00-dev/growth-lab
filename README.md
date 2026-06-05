@@ -33,6 +33,12 @@ docs/04-architecture.md
 
 This project should start as a demo-first local web app with realistic mocked data. Real integrations can be added later for commerce, analytics, ads, social, and email platforms after the core workflows are strong.
 
+## Live App
+
+```text
+https://breadback00-dev.github.io/growth-lab/
+```
+
 ## Commands
 
 ```powershell
@@ -53,9 +59,7 @@ http://localhost:5173
 
 ## Preview Deployment
 
-GitHub Pages is configured through `.github/workflows/pages.yml`. After Pages is enabled for the private repository, pushes to `main` build, test, and deploy the app.
-
-Expected preview URL:
+GitHub Pages is configured through `.github/workflows/pages.yml`. The repository is public, Pages is enabled, and pushes to `main` build, test, and deploy the app.
 
 ```text
 https://breadback00-dev.github.io/growth-lab/

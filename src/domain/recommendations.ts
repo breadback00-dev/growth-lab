@@ -4,10 +4,24 @@ import type {
   CreativeAsset,
   Experiment,
   MonthlySales,
-  Recommendation
+  Recommendation,
+  WeeklyAction,
+  WeeklyActionStatus
 } from "../types";
 import { calculateGrowth } from "./growth";
 import { classifyExperiment } from "./experiments";
+
+const priorityRank: Record<Recommendation["priority"], number> = {
+  high: 0,
+  medium: 1,
+  low: 2
+};
+
+const statusRank: Record<WeeklyActionStatus, number> = {
+  todo: 0,
+  snoozed: 1,
+  done: 2
+};
 
 export function generateWeeklyRecommendations(input: {
   sales: MonthlySales[];
@@ -78,4 +92,60 @@ export function generateWeeklyRecommendations(input: {
       linkedExperimentId: stalledExperiment?.id
     }
   ];
+}
+
+export function createWeeklyActionFromRecommendation(
+  recommendation: Recommendation,
+  savedAction?: WeeklyAction
+): WeeklyAction {
+  return {
+    id: savedAction?.id ?? `action-${recommendation.id}`,
+    recommendationId: recommendation.id,
+    priority: recommendation.priority,
+    title: recommendation.title,
+    rationale: recommendation.rationale,
+    nextStep: recommendation.nextStep,
+    status: savedAction?.status ?? "todo",
+    linkedExperimentId: recommendation.linkedExperimentId,
+    linkedCampaignId: recommendation.linkedCampaignId
+  };
+}
+
+export function orderWeeklyActions(actions: WeeklyAction[]): WeeklyAction[] {
+  return [...actions].sort((left, right) => {
+    const statusDifference = statusRank[left.status] - statusRank[right.status];
+
+    if (statusDifference !== 0) {
+      return statusDifference;
+    }
+
+    const priorityDifference = priorityRank[left.priority] - priorityRank[right.priority];
+
+    if (priorityDifference !== 0) {
+      return priorityDifference;
+    }
+
+    return left.title.localeCompare(right.title);
+  });
+}
+
+export function buildWeeklyActions(
+  recommendations: Recommendation[],
+  savedActions: WeeklyAction[]
+): WeeklyAction[] {
+  const savedByRecommendation = new Map(
+    savedActions.map((action) => [action.recommendationId, action])
+  );
+  const liveRecommendationIds = new Set(recommendations.map((recommendation) => recommendation.id));
+  const activeActions = recommendations.map((recommendation) =>
+    createWeeklyActionFromRecommendation(
+      recommendation,
+      savedByRecommendation.get(recommendation.id)
+    )
+  );
+  const carriedActions = savedActions.filter(
+    (action) => action.status === "snoozed" && !liveRecommendationIds.has(action.recommendationId)
+  );
+
+  return orderWeeklyActions([...activeActions, ...carriedActions]);
 }

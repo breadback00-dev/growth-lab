@@ -6,7 +6,7 @@ import {
   campaigns,
   creativeAssets,
 } from "./data/demoData";
-import { generateWeeklyRecommendations } from "./domain/recommendations";
+import { buildWeeklyActions, generateWeeklyRecommendations } from "./domain/recommendations";
 import AudiencesPage from "./pages/AudiencesPage";
 import CreativePage from "./pages/CreativePage";
 import DashboardPage from "./pages/DashboardPage";
@@ -22,6 +22,7 @@ export default function App() {
     state,
     replaceMonthlySales,
     resetToDemo,
+    setWeeklyActionStatus,
     updatePlanMonth,
     upsertExperiment
   } = useGrowthLabState();
@@ -36,6 +37,10 @@ export default function App() {
       }),
     [state.experiments, state.monthlySales]
   );
+  const weeklyActions = useMemo(
+    () => buildWeeklyActions(recommendations, state.weeklyActions),
+    [recommendations, state.weeklyActions]
+  );
 
   const pages: Record<PageId, React.ReactNode> = {
     dashboard: (
@@ -45,7 +50,8 @@ export default function App() {
         sales={state.monthlySales}
         campaigns={campaigns}
         experiments={state.experiments}
-        recommendations={recommendations}
+        weeklyActions={weeklyActions}
+        onSetWeeklyActionStatus={setWeeklyActionStatus}
       />
     ),
     plan: <PlanPage campaigns={campaigns} months={state.planMonths} onUpdateMonth={updatePlanMonth} />,
@@ -65,7 +71,12 @@ export default function App() {
         brand={brandProfile}
       />
     ),
-    recommendations: <RecommendationsPage recommendations={recommendations} />
+    recommendations: (
+      <RecommendationsPage
+        weeklyActions={weeklyActions}
+        onSetWeeklyActionStatus={setWeeklyActionStatus}
+      />
+    )
   };
 
   return (

@@ -4,7 +4,14 @@ import MonthComparison from "../components/MonthComparison";
 import WeeklyActions from "../components/WeeklyActions";
 import { parseSalesCsv } from "../domain/salesImport";
 import { useMemo, useState } from "react";
-import type { BrandProfile, Campaign, Experiment, MonthlySales, Recommendation } from "../types";
+import type {
+  BrandProfile,
+  Campaign,
+  Experiment,
+  MonthlySales,
+  WeeklyAction,
+  WeeklyActionStatus
+} from "../types";
 
 interface DashboardPageProps {
   brand: BrandProfile;
@@ -12,7 +19,8 @@ interface DashboardPageProps {
   onReplaceSales: (sales: MonthlySales[]) => void;
   campaigns: Campaign[];
   experiments: Experiment[];
-  recommendations: Recommendation[];
+  weeklyActions: WeeklyAction[];
+  onSetWeeklyActionStatus: (action: WeeklyAction, status: WeeklyActionStatus) => void;
 }
 
 export default function DashboardPage({
@@ -21,7 +29,8 @@ export default function DashboardPage({
   onReplaceSales,
   campaigns,
   experiments,
-  recommendations
+  weeklyActions,
+  onSetWeeklyActionStatus
 }: DashboardPageProps) {
   const [selectedMonthName, setSelectedMonthName] = useState(sales[sales.length - 1]?.month ?? "");
   const [csvText, setCsvText] = useState(
@@ -66,7 +75,10 @@ export default function DashboardPage({
 
       <div className="two-column">
         <ExperimentSnapshot experiments={experiments} />
-        <WeeklyActions recommendations={recommendations} />
+        <WeeklyActions
+          actions={weeklyActions}
+          onSetStatus={onSetWeeklyActionStatus}
+        />
       </div>
 
       <MonthComparison sales={sales} />

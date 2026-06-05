@@ -169,6 +169,7 @@ summary:focus-visible {
   color: rgba(255, 250, 240, 0.72);
   font-size: 0.92rem;
   line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .primary-button,
@@ -203,6 +204,14 @@ summary:focus-visible {
   background: transparent;
   border: 1px solid currentColor;
   color: inherit;
+}
+
+.icon-button {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  justify-content: center;
+  width: auto;
 }
 
 .main-surface {
@@ -394,10 +403,54 @@ summary:focus-visible {
   grid-template-columns: 76px minmax(0, 1fr);
 }
 
+.action-item.done,
+.recommendation-row.done {
+  background: #f2f0e8;
+}
+
 .action-item p {
   color: var(--muted);
   line-height: 1.45;
   margin: 4px 0 0;
+}
+
+.action-title-row {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.action-controls {
+  margin-top: 10px;
+}
+
+.agenda-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.agenda-summary span,
+.agenda-label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.agenda-summary span {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 9px;
+}
+
+.agenda-group {
+  display: grid;
+  gap: 8px;
 }
 
 .priority,
@@ -427,6 +480,7 @@ summary:focus-visible {
 .decision.launch,
 .status-pill.review,
 .status-pill.planned,
+.status-pill.snoozed,
 .inline-tag {
   background: var(--gold-soft);
   color: var(--gold);
@@ -436,9 +490,15 @@ summary:focus-visible {
 .decision.scale,
 .status-pill.good,
 .status-pill.active,
-.status-pill.scale {
+.status-pill.scale,
+.status-pill.done {
   background: var(--green-soft);
   color: var(--green);
+}
+
+.status-pill.todo {
+  background: var(--blue-soft);
+  color: var(--blue);
 }
 
 .status-pill.stop {

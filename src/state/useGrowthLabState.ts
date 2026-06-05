@@ -1,13 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { experiments, monthlySales, planMonths } from "../data/demoData";
-import type { Experiment, GrowthLabState, MonthlySales, PlanMonth } from "../types";
+import type {
+  Experiment,
+  GrowthLabState,
+  MonthlySales,
+  PlanMonth,
+  WeeklyAction,
+  WeeklyActionStatus
+} from "../types";
 
 const STORAGE_KEY = "growth-lab-state-v2";
 
 export const demoState: GrowthLabState = {
   monthlySales,
   planMonths,
-  experiments
+  experiments,
+  weeklyActions: []
 };
 
 function isGrowthLabState(value: unknown): value is GrowthLabState {
@@ -24,6 +32,15 @@ function isGrowthLabState(value: unknown): value is GrowthLabState {
   );
 }
 
+function normalizeGrowthLabState(value: GrowthLabState): GrowthLabState {
+  return {
+    monthlySales: value.monthlySales,
+    planMonths: value.planMonths,
+    experiments: value.experiments,
+    weeklyActions: Array.isArray(value.weeklyActions) ? value.weeklyActions : []
+  };
+}
+
 function loadInitialState(): GrowthLabState {
   if (typeof window === "undefined") {
     return demoState;
@@ -37,7 +54,7 @@ function loadInitialState(): GrowthLabState {
 
   try {
     const parsed = JSON.parse(saved) as unknown;
-    return isGrowthLabState(parsed) ? parsed : demoState;
+    return isGrowthLabState(parsed) ? normalizeGrowthLabState(parsed) : demoState;
   } catch {
     return demoState;
   }
@@ -85,6 +102,25 @@ export function useGrowthLabState() {
     setState((current) => ({ ...current, monthlySales: sales }));
   }, []);
 
+  const setWeeklyActionStatus = useCallback(
+    (action: WeeklyAction, status: WeeklyActionStatus) => {
+      setState((current) => {
+        const nextAction = { ...action, status };
+        const exists = current.weeklyActions.some((item) => item.id === action.id);
+
+        return {
+          ...current,
+          weeklyActions: exists
+            ? current.weeklyActions.map((item) =>
+                item.id === action.id ? nextAction : item
+              )
+            : [...current.weeklyActions, nextAction]
+        };
+      });
+    },
+    []
+  );
+
   const resetToDemo = useCallback(() => {
     window.localStorage.removeItem(STORAGE_KEY);
     setState(demoState);
@@ -96,8 +132,16 @@ export function useGrowthLabState() {
       upsertExperiment,
       updatePlanMonth,
       replaceMonthlySales,
+      setWeeklyActionStatus,
       resetToDemo
     }),
-    [replaceMonthlySales, resetToDemo, state, updatePlanMonth, upsertExperiment]
+    [
+      replaceMonthlySales,
+      resetToDemo,
+      setWeeklyActionStatus,
+      state,
+      updatePlanMonth,
+      upsertExperiment
+    ]
   );
 }

@@ -286,6 +286,7 @@ summary:focus-visible {
 }
 
 .section-block {
+  align-content: start;
   display: grid;
   gap: 18px;
   padding: 20px;
@@ -307,6 +308,53 @@ summary:focus-visible {
 
 .section-heading h2 {
   font-size: 1.35rem;
+}
+
+.platform-guide {
+  background: #fffaf0;
+}
+
+.guide-steps {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.guide-steps li {
+  align-items: flex-start;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 34px minmax(0, 1fr);
+  min-height: 118px;
+  padding: 12px;
+}
+
+.guide-steps li > span {
+  background: var(--green);
+  border-radius: 999px;
+  color: #fffaf0;
+  display: grid;
+  font-weight: 900;
+  height: 30px;
+  place-items: center;
+  width: 30px;
+}
+
+.guide-steps strong {
+  display: block;
+  line-height: 1.2;
+}
+
+.guide-steps p {
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 5px 0 0;
 }
 
 .metric-grid {
@@ -349,6 +397,7 @@ summary:focus-visible {
 }
 
 .two-column {
+  align-items: start;
   display: grid;
   gap: 22px;
   grid-template-columns: minmax(0, 1fr) minmax(340px, 0.8fr);
@@ -908,6 +957,7 @@ summary:focus-visible {
   .page-header,
   .two-column,
   .metric-grid,
+  .guide-steps,
   .audience-grid,
   .creative-grid,
   .form-grid,

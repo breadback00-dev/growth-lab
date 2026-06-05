@@ -1,10 +1,15 @@
 import type {
+  AudienceCreativeMatrixRow,
+  AudienceCreativePairing,
+  AudienceSegment,
   BudgetCandidateScore,
   BudgetScenario,
   BudgetScenarioStrategy,
+  CreativeAsset,
   Experiment,
   ExperimentDecision,
-  NextAction
+  NextAction,
+  PairingState
 } from "../types";
 
 export function progressToTarget(experiment: Experiment): number {
@@ -41,6 +46,135 @@ export function groupExperimentsByAction(experiments: Experiment[]) {
     },
     { launch: [], scale: [], iterate: [], stop: [] }
   );
+}
+
+const pairingStateRank: Record<PairingState, number> = {
+  winning: 0,
+  needsIteration: 1,
+  stopped: 2,
+  planned: 3,
+  untested: 4
+};
+
+export const pairingStateLabels: Record<PairingState, string> = {
+  winning: "Winning",
+  needsIteration: "Needs iteration",
+  stopped: "Stopped",
+  planned: "Planned",
+  untested: "Untested"
+};
+
+export function getPairingState(experiments: Experiment[]): PairingState {
+  if (experiments.length === 0) {
+    return "untested";
+  }
+
+  const states = experiments.map((experiment) => {
+    const decision = classifyExperiment(experiment);
+
+    if (decision === "scale") {
+      return "winning";
+    }
+
+    if (decision === "iterate") {
+      return "needsIteration";
+    }
+
+    if (decision === "stop") {
+      return "stopped";
+    }
+
+    return "planned";
+  });
+
+  return states.sort((left, right) => pairingStateRank[left] - pairingStateRank[right])[0];
+}
+
+function getPrimaryExperiment(experiments: Experiment[], state: PairingState) {
+  return experiments
+    .filter((experiment) => {
+      if (state === "untested") {
+        return false;
+      }
+
+      return getPairingState([experiment]) === state;
+    })
+    .sort((left, right) => progressToTarget(right) - progressToTarget(left))[0];
+}
+
+export function describePairing(pairing: Pick<AudienceCreativePairing, "state" | "primaryExperiment">) {
+  const { primaryExperiment, state } = pairing;
+
+  if (state === "untested") {
+    return {
+      summary: "No linked experiment yet.",
+      nextStep: "Use this as a learning gap, not a failure."
+    };
+  }
+
+  if (!primaryExperiment) {
+    return {
+      summary: "Linked experiment needs review.",
+      nextStep: "Check experiment notes before changing spend."
+    };
+  }
+
+  const progress = Math.round(progressToTarget(primaryExperiment) * 100);
+
+  if (state === "winning") {
+    return {
+      summary: `${primaryExperiment.title} reached ${progress}% of target.`,
+      nextStep: "Reuse the pairing or test a controlled variant."
+    };
+  }
+
+  if (state === "needsIteration") {
+    return {
+      summary: `${primaryExperiment.title} is at ${progress}% of target.`,
+      nextStep: "Change one variable before running it again."
+    };
+  }
+
+  if (state === "stopped") {
+    return {
+      summary: `${primaryExperiment.title} is weak or complete.`,
+      nextStep: "Do not spend more until the angle changes."
+    };
+  }
+
+  return {
+    summary: `${primaryExperiment.title} is ready to launch.`,
+    nextStep: "Run it before judging the pairing."
+  };
+}
+
+export function buildAudienceCreativeMatrix(input: {
+  audiences: AudienceSegment[];
+  creativeAssets: CreativeAsset[];
+  experiments: Experiment[];
+}): AudienceCreativeMatrixRow[] {
+  return input.audiences.map((audience) => ({
+    audience,
+    pairings: input.creativeAssets.map((asset) => {
+      const linkedExperiments = input.experiments.filter(
+        (experiment) =>
+          experiment.audienceId === audience.id && experiment.creativeAssetId === asset.id
+      );
+      const state = getPairingState(linkedExperiments);
+      const primaryExperiment = getPrimaryExperiment(linkedExperiments, state);
+      const description = describePairing({ state, primaryExperiment });
+
+      return {
+        audienceId: audience.id,
+        creativeAssetId: asset.id,
+        state,
+        experiments: linkedExperiments,
+        primaryExperiment,
+        summary: description.summary,
+        nextStep: description.nextStep
+      };
+    })
+  }));
 }
 
 export function isPaidExperiment(experiment: Experiment): boolean {

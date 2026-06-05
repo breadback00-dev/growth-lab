@@ -11,6 +11,7 @@ import {
   createWeeklyActionFromRecommendation,
   generateWeeklyRecommendations
 } from "../src/domain/recommendations";
+import { buildAudienceCreativeMatrix } from "../src/domain/experiments";
 import { generateCopyVariants } from "../src/services/copyAssistant";
 import type { WeeklyAction } from "../src/types";
 
@@ -124,5 +125,50 @@ describe("generateCopyVariants", () => {
     expect(giftVariants[0].text.toLowerCase()).toContain("gift");
     expect(giftVariants[0].rationale).toContain(audiences[1].name);
     expect(giftVariants[0].rationale).toContain(creativeAssets[1].title);
+  });
+
+  it("grounds copy rationale in a proven pairing or a gap to test", () => {
+    const matrix = buildAudienceCreativeMatrix({ audiences, creativeAssets, experiments });
+    const localWinner = matrix
+      .find((row) => row.audience.id === "aud-local")!
+      .pairings.find((pairing) => pairing.creativeAssetId === "asset-maker-caption");
+    const collectorGap = matrix
+      .find((row) => row.audience.id === "aud-collector")!
+      .pairings.find((pairing) => pairing.creativeAssetId === "asset-gift-bundle");
+
+    const winningVariants = generateCopyVariants({
+      audience: audiences.find((audience) => audience.id === "aud-local")!,
+      asset: creativeAssets.find((asset) => asset.id === "asset-maker-caption")!,
+      brand: {
+        name: "Stokes Croft China",
+        mission: "Fine bone china with a Bristol community pulse.",
+        followers: 13200,
+        physicalVsOnlineSalesRatio: 3,
+        monthlyPaidBudget: 300,
+        tone: ["local", "crafted"],
+        constraints: []
+      },
+      outputType: "caption",
+      pairing: localWinner
+    });
+    const gapVariants = generateCopyVariants({
+      audience: audiences.find((audience) => audience.id === "aud-collector")!,
+      asset: creativeAssets.find((asset) => asset.id === "asset-gift-bundle")!,
+      brand: {
+        name: "Stokes Croft China",
+        mission: "Fine bone china with a Bristol community pulse.",
+        followers: 13200,
+        physicalVsOnlineSalesRatio: 3,
+        monthlyPaidBudget: 300,
+        tone: ["local", "crafted"],
+        constraints: []
+      },
+      outputType: "caption",
+      pairing: collectorGap
+    });
+
+    expect(winningVariants[0].rationale).toContain("Pairing signal: winning");
+    expect(gapVariants[0].text).toContain("Test the gap");
+    expect(gapVariants[0].rationale).toContain("untested audience and creative gap");
   });
 });

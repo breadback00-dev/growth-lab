@@ -589,6 +589,116 @@ summary:focus-visible {
   margin-left: 8px;
 }
 
+.matrix-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.matrix-wrap {
+  overflow-x: auto;
+}
+
+.matrix-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 980px;
+  width: 100%;
+}
+
+.matrix-table th,
+.matrix-table td {
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  padding: 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.matrix-table th:first-child,
+.matrix-table td:first-child {
+  border-left: 1px solid var(--line);
+}
+
+.matrix-table thead th {
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  min-width: 170px;
+}
+
+.matrix-table thead th:first-child,
+.matrix-table tbody th {
+  min-width: 190px;
+}
+
+.matrix-table th span,
+.matrix-table td small,
+.matrix-table td em {
+  color: var(--muted);
+  display: block;
+  line-height: 1.4;
+}
+
+.matrix-table th span {
+  font-size: 0.78rem;
+  font-weight: 800;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.matrix-table tbody th {
+  background: #fffaf0;
+  font-weight: 900;
+}
+
+.matrix-table td {
+  background: var(--paper-strong);
+}
+
+.matrix-table td strong {
+  display: block;
+  line-height: 1.25;
+  margin-top: 8px;
+}
+
+.matrix-table td em {
+  font-style: normal;
+  margin-top: 6px;
+}
+
+.matrix-state {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 5px 9px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.matrix-state.winning {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.matrix-state.needsIteration,
+.matrix-state.planned {
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.matrix-state.stopped {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.matrix-state.untested {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
 .timeline {
   display: grid;
   gap: 12px;
@@ -880,6 +990,31 @@ summary:focus-visible {
 
 .copy-box small {
   color: #375568;
+}
+
+.pairing-signal {
+  align-items: flex-start;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+}
+
+.pairing-signal strong {
+  display: block;
+  line-height: 1.25;
+}
+
+.pairing-signal p,
+.pairing-signal small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.pairing-signal p {
+  margin: 4px 0 0;
 }
 
 .form-grid {

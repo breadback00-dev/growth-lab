@@ -1,19 +1,34 @@
 import { useMemo, useState } from "react";
+import { buildAudienceCreativeMatrix, pairingStateLabels } from "../domain/experiments";
 import { generateCopySet, generateCopyVariants } from "../services/copyAssistant";
-import type { AudienceSegment, BrandProfile, CopyOutputType, CreativeAsset } from "../types";
+import type {
+  AudienceSegment,
+  BrandProfile,
+  CopyOutputType,
+  CreativeAsset,
+  Experiment
+} from "../types";
 
 interface CreativePageProps {
   assets: CreativeAsset[];
   audiences: AudienceSegment[];
   brand: BrandProfile;
+  experiments: Experiment[];
 }
 
-export default function CreativePage({ assets, audiences, brand }: CreativePageProps) {
+export default function CreativePage({ assets, audiences, brand, experiments }: CreativePageProps) {
   const [selectedAudienceId, setSelectedAudienceId] = useState(audiences[0]?.id ?? "");
   const [selectedAssetId, setSelectedAssetId] = useState(assets[0]?.id ?? "");
   const [outputType, setOutputType] = useState<CopyOutputType>("caption");
   const selectedAudience = audiences.find((audience) => audience.id === selectedAudienceId) ?? audiences[0];
   const selectedAsset = assets.find((asset) => asset.id === selectedAssetId) ?? assets[0];
+  const matrixRows = useMemo(
+    () => buildAudienceCreativeMatrix({ audiences, creativeAssets: assets, experiments }),
+    [assets, audiences, experiments]
+  );
+  const selectedPairing = matrixRows
+    .find((row) => row.audience.id === selectedAudience?.id)
+    ?.pairings.find((pairing) => pairing.creativeAssetId === selectedAsset?.id);
   const variants = useMemo(
     () =>
       selectedAudience && selectedAsset
@@ -21,10 +36,11 @@ export default function CreativePage({ assets, audiences, brand }: CreativePageP
             audience: selectedAudience,
             asset: selectedAsset,
             brand,
-            outputType
+            outputType,
+            pairing: selectedPairing
           })
         : [],
-    [brand, outputType, selectedAsset, selectedAudience]
+    [brand, outputType, selectedAsset, selectedAudience, selectedPairing]
   );
 
   return (
@@ -84,6 +100,20 @@ export default function CreativePage({ assets, audiences, brand }: CreativePageP
             </select>
           </label>
         </div>
+        {selectedPairing ? (
+          <div className="pairing-signal">
+            <span className={`matrix-state ${selectedPairing.state}`}>
+              {pairingStateLabels[selectedPairing.state]}
+            </span>
+            <div>
+              <strong>
+                {selectedAudience.name} + {selectedAsset.title}
+              </strong>
+              <p>{selectedPairing.summary}</p>
+              <small>{selectedPairing.nextStep}</small>
+            </div>
+          </div>
+        ) : null}
         <div className="variant-list">
           {variants.map((variant) => (
             <article className="copy-box" key={variant.text}>
@@ -97,7 +127,10 @@ export default function CreativePage({ assets, audiences, brand }: CreativePageP
       <section className="creative-grid">
         {assets.map((asset) => {
           const audience = audiences.find((item) => asset.audienceFit.includes(item.id)) ?? audiences[0];
-          const copy = generateCopySet({ audience, asset, brand });
+          const pairing = matrixRows
+            .find((row) => row.audience.id === audience.id)
+            ?.pairings.find((item) => item.creativeAssetId === asset.id);
+          const copy = generateCopySet({ audience, asset, brand, pairing });
 
           return (
             <article className="creative-card" key={asset.id}>

@@ -1,14 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildAudienceCreativeMatrix,
   buildBudgetAllocationScenarios,
   classifyExperiment,
   createExperimentDecision,
   getExperimentDecisions,
+  getPairingState,
   groupExperimentsByAction,
   isPaidExperiment,
   scoreBudgetCandidate
 } from "../src/domain/experiments";
-import { experiments } from "../src/data/demoData";
+import { audiences, creativeAssets, experiments } from "../src/data/demoData";
 
 describe("classifyExperiment", () => {
   it("classifies planned experiments as launch", () => {
@@ -51,6 +53,44 @@ describe("groupExperimentsByAction", () => {
     expect(organic).toBeDefined();
     expect(isPaidExperiment(paid!)).toBe(true);
     expect(isPaidExperiment(organic!)).toBe(false);
+  });
+});
+
+describe("audience creative performance matrix", () => {
+  it("derives pairing states from linked experiment evidence", () => {
+    const matrix = buildAudienceCreativeMatrix({ audiences, creativeAssets, experiments });
+    const localRow = matrix.find((row) => row.audience.id === "aud-local");
+    const giftRow = matrix.find((row) => row.audience.id === "aud-gift");
+    const touristRow = matrix.find((row) => row.audience.id === "aud-tourist");
+
+    expect(localRow).toBeDefined();
+    expect(giftRow).toBeDefined();
+    expect(touristRow).toBeDefined();
+    expect(
+      localRow!.pairings.find((pairing) => pairing.creativeAssetId === "asset-maker-caption")
+        ?.state
+    ).toBe("winning");
+    expect(
+      giftRow!.pairings.find((pairing) => pairing.creativeAssetId === "asset-gift-bundle")
+        ?.state
+    ).toBe("needsIteration");
+    expect(
+      touristRow!.pairings.find((pairing) => pairing.creativeAssetId === "asset-gift-guide")
+        ?.state
+    ).toBe("planned");
+  });
+
+  it("keeps untested pairings visible without treating them as failures", () => {
+    const matrix = buildAudienceCreativeMatrix({ audiences, creativeAssets, experiments });
+    const collectorRow = matrix.find((row) => row.audience.id === "aud-collector");
+    const untestedPairing = collectorRow!.pairings.find(
+      (pairing) => pairing.creativeAssetId === "asset-gift-bundle"
+    );
+
+    expect(getPairingState([])).toBe("untested");
+    expect(untestedPairing?.state).toBe("untested");
+    expect(untestedPairing?.summary).toBe("No linked experiment yet.");
+    expect(untestedPairing?.nextStep).toContain("learning gap");
   });
 });
 

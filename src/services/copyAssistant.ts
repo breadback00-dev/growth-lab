@@ -1,18 +1,38 @@
-import type { AudienceSegment, BrandProfile, CopyOutputType, CreativeAsset } from "../types";
+import { pairingStateLabels } from "../domain/experiments";
+import type {
+  AudienceCreativePairing,
+  AudienceSegment,
+  BrandProfile,
+  CopyOutputType,
+  CreativeAsset
+} from "../types";
+
+function getPairingRationale(pairing?: AudienceCreativePairing) {
+  if (!pairing) {
+    return "";
+  }
+
+  if (pairing.state === "untested") {
+    return " This is an untested audience and creative gap, so use the copy as a learning test.";
+  }
+
+  return ` Pairing signal: ${pairingStateLabels[pairing.state].toLowerCase()} based on ${pairing.primaryExperiment?.title ?? "linked experiment evidence"}.`;
+}
 
 export function generateCopySet(input: {
   audience: AudienceSegment;
   asset: CreativeAsset;
   brand: BrandProfile;
+  pairing?: AudienceCreativePairing;
 }) {
-  const { audience, asset, brand } = input;
+  const { audience, asset, brand, pairing } = input;
   const tone = brand.tone.slice(0, 2).join(" and ");
 
   return {
     caption: `${asset.product} for ${audience.name.toLowerCase()}: ${audience.messageAngle}`,
     emailSubject: `${asset.theme}: a ${tone} note from ${brand.name}`,
     paidHook: `For ${audience.name.toLowerCase()} who want ${audience.proofPoints[0].toLowerCase()}, start with ${asset.title}.`,
-    rationale: `Grounded in ${audience.name}, ${asset.title}, and the ${asset.theme} creative theme.`
+    rationale: `Grounded in ${audience.name}, ${asset.title}, and the ${asset.theme} creative theme.${getPairingRationale(pairing)}`
   };
 }
 
@@ -21,14 +41,19 @@ export function generateCopyVariants(input: {
   asset: CreativeAsset;
   brand: BrandProfile;
   outputType: CopyOutputType;
+  pairing?: AudienceCreativePairing;
 }): Array<{ text: string; rationale: string }> {
-  const { audience, asset, brand, outputType } = input;
-  const base = generateCopySet({ audience, asset, brand });
-  const groundedIn = `Grounded in ${audience.name}, ${asset.title}, and ${asset.theme}.`;
+  const { audience, asset, brand, outputType, pairing } = input;
+  const base = generateCopySet({ audience, asset, brand, pairing });
+  const groundedIn = `Grounded in ${audience.name}, ${asset.title}, and ${asset.theme}.${getPairingRationale(pairing)}`;
+  const gapLead =
+    pairing?.state === "untested"
+      ? `Test the gap: ${audience.messageAngle}`
+      : base.caption;
 
   const variants: Record<CopyOutputType, string[]> = {
     caption: [
-      base.caption,
+      gapLead,
       `${brand.name} made ${asset.product.toLowerCase()} for people who care about ${audience.proofPoints[0].toLowerCase()}.`,
       `${audience.messageAngle} ${asset.reuseNote}`
     ],

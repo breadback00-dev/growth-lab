@@ -5,7 +5,7 @@ const steps = [
   },
   {
     title: "Review experiment evidence",
-    detail: "Look for scale, iterate, launch, or stop signals before changing spend."
+    detail: "Check experiment signals and the audience x creative matrix before changing spend."
   },
   {
     title: "Choose this week's actions",

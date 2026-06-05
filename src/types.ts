@@ -12,6 +12,7 @@ export type NextAction = "launch" | "scale" | "iterate" | "stop";
 export type Confidence = "low" | "medium" | "high";
 export type CopyOutputType = "caption" | "emailSubject" | "paidHook" | "bundleIdea";
 export type WeeklyActionStatus = "todo" | "done" | "snoozed";
+export type PairingState = "winning" | "needsIteration" | "stopped" | "planned" | "untested";
 
 export interface BrandProfile {
   name: string;
@@ -67,6 +68,21 @@ export interface ExperimentDecision {
   decidedAt: string;
   reasoning: string;
   nextExperimentIdea: string;
+}
+
+export interface AudienceCreativePairing {
+  audienceId: string;
+  creativeAssetId: string;
+  state: PairingState;
+  experiments: Experiment[];
+  primaryExperiment?: Experiment;
+  summary: string;
+  nextStep: string;
+}
+
+export interface AudienceCreativeMatrixRow {
+  audience: AudienceSegment;
+  pairings: AudienceCreativePairing[];
 }
 
 export type BudgetScenarioStrategy = "evidence" | "learning";

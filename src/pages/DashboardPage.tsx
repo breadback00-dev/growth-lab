@@ -2,6 +2,7 @@ import BudgetScenarioPlanner from "../components/BudgetScenarioPlanner";
 import ExperimentSnapshot from "../components/ExperimentSnapshot";
 import GrowthSummary from "../components/GrowthSummary";
 import MonthComparison from "../components/MonthComparison";
+import PlatformGuide from "../components/PlatformGuide";
 import WeeklyActions from "../components/WeeklyActions";
 import { parseSalesCsv } from "../domain/salesImport";
 import { useMemo, useState } from "react";
@@ -71,6 +72,8 @@ export default function DashboardPage({
           <small>{activeCampaign?.goal ?? "Start with the month 1 audit."}</small>
         </div>
       </header>
+
+      <PlatformGuide />
 
       <GrowthSummary selectedMonth={selectedMonth} sales={sales} />
 

@@ -1,3 +1,4 @@
+import BudgetScenarioPlanner from "../components/BudgetScenarioPlanner";
 import ExperimentSnapshot from "../components/ExperimentSnapshot";
 import GrowthSummary from "../components/GrowthSummary";
 import MonthComparison from "../components/MonthComparison";
@@ -82,6 +83,12 @@ export default function DashboardPage({
       </div>
 
       <MonthComparison sales={sales} />
+
+      <BudgetScenarioPlanner
+        experiments={experiments}
+        monthlyBudget={brand.monthlyPaidBudget}
+        selectedMonth={selectedMonth}
+      />
 
       <section className="section-block">
         <div className="section-heading">

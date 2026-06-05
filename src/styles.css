@@ -661,6 +661,47 @@ summary:focus-visible {
   padding-left: 10px;
 }
 
+.learning-log {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+}
+
+.learning-entry {
+  background: var(--paper-strong);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: grid;
+  gap: 7px;
+  padding: 10px;
+}
+
+.learning-entry p {
+  margin: 0;
+}
+
+.learning-entry strong {
+  font-size: 0.92rem;
+}
+
+.learning-entry-top {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.learning-entry time {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.decision-editor textarea {
+  min-height: 78px;
+}
+
 .audience-grid,
 .creative-grid {
   display: grid;

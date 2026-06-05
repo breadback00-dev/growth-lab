@@ -1,4 +1,4 @@
-import type { Experiment, NextAction } from "../types";
+import type { Experiment, ExperimentDecision, NextAction } from "../types";
 
 export function progressToTarget(experiment: Experiment): number {
   if (experiment.targetValue === 0) {
@@ -38,4 +38,31 @@ export function groupExperimentsByAction(experiments: Experiment[]) {
 
 export function isPaidExperiment(experiment: Experiment): boolean {
   return experiment.channel === "paid" || experiment.spend > 0;
+}
+
+export function createExperimentDecision(input: {
+  experiment: Experiment;
+  reasoning: string;
+  nextExperimentIdea: string;
+  decidedAt?: string;
+}): ExperimentDecision {
+  const decidedAt = input.decidedAt ?? new Date().toISOString();
+
+  return {
+    id: `decision-${input.experiment.id}-${decidedAt}`,
+    experimentId: input.experiment.id,
+    decision: classifyExperiment(input.experiment),
+    decidedAt,
+    reasoning: input.reasoning.trim(),
+    nextExperimentIdea: input.nextExperimentIdea.trim()
+  };
+}
+
+export function getExperimentDecisions(
+  experimentId: string,
+  decisions: ExperimentDecision[]
+): ExperimentDecision[] {
+  return decisions
+    .filter((decision) => decision.experimentId === experimentId)
+    .sort((left, right) => right.decidedAt.localeCompare(left.decidedAt));
 }

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   classifyExperiment,
+  createExperimentDecision,
+  getExperimentDecisions,
   groupExperimentsByAction,
   isPaidExperiment
 } from "../src/domain/experiments";
@@ -47,5 +49,64 @@ describe("groupExperimentsByAction", () => {
     expect(organic).toBeDefined();
     expect(isPaidExperiment(paid!)).toBe(true);
     expect(isPaidExperiment(organic!)).toBe(false);
+  });
+});
+
+describe("experiment decision learning log", () => {
+  it("creates a dated decision entry from the current experiment classification", () => {
+    const winner = experiments.find((experiment) => experiment.id === "exp-local-caption");
+
+    expect(winner).toBeDefined();
+    const decision = createExperimentDecision({
+      experiment: winner!,
+      reasoning: "  Strongest signal and clear audience fit.  ",
+      nextExperimentIdea: "  Try the same angle as an email subject.  ",
+      decidedAt: "2026-06-05T12:00:00.000Z"
+    });
+
+    expect(decision).toEqual({
+      id: "decision-exp-local-caption-2026-06-05T12:00:00.000Z",
+      experimentId: "exp-local-caption",
+      decision: "scale",
+      decidedAt: "2026-06-05T12:00:00.000Z",
+      reasoning: "Strongest signal and clear audience fit.",
+      nextExperimentIdea: "Try the same angle as an email subject."
+    });
+  });
+
+  it("returns learning history for one experiment newest first", () => {
+    const decisions = [
+      {
+        id: "decision-old",
+        experimentId: "exp-local-caption",
+        decision: "iterate" as const,
+        decidedAt: "2026-06-04T12:00:00.000Z",
+        reasoning: "Older note",
+        nextExperimentIdea: "Older idea"
+      },
+      {
+        id: "decision-other",
+        experimentId: "exp-gift-bundle",
+        decision: "iterate" as const,
+        decidedAt: "2026-06-06T12:00:00.000Z",
+        reasoning: "Other experiment",
+        nextExperimentIdea: "Other idea"
+      },
+      {
+        id: "decision-new",
+        experimentId: "exp-local-caption",
+        decision: "scale" as const,
+        decidedAt: "2026-06-05T12:00:00.000Z",
+        reasoning: "Newer note",
+        nextExperimentIdea: "Newer idea"
+      }
+    ];
+
+    const history = getExperimentDecisions("exp-local-caption", decisions);
+
+    expect(history.map((decision) => decision.id)).toEqual([
+      "decision-new",
+      "decision-old"
+    ]);
   });
 });

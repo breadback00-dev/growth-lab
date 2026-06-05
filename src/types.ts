@@ -11,6 +11,7 @@ export type ExperimentStatus = "planned" | "running" | "complete";
 export type NextAction = "launch" | "scale" | "iterate" | "stop";
 export type Confidence = "low" | "medium" | "high";
 export type CopyOutputType = "caption" | "emailSubject" | "paidHook" | "bundleIdea";
+export type WeeklyActionStatus = "todo" | "done" | "snoozed";
 
 export interface BrandProfile {
   name: string;
@@ -88,6 +89,18 @@ export interface Recommendation {
   linkedCampaignId?: string;
 }
 
+export interface WeeklyAction {
+  id: string;
+  recommendationId: string;
+  priority: Recommendation["priority"];
+  title: string;
+  rationale: string;
+  nextStep: string;
+  status: WeeklyActionStatus;
+  linkedExperimentId?: string;
+  linkedCampaignId?: string;
+}
+
 export interface PlanMonth {
   month: string;
   phase: string;
@@ -101,4 +114,5 @@ export interface GrowthLabState {
   monthlySales: MonthlySales[];
   planMonths: PlanMonth[];
   experiments: Experiment[];
+  weeklyActions: WeeklyAction[];
 }

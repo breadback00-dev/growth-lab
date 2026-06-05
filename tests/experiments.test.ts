@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildBudgetAllocationScenarios,
   classifyExperiment,
   createExperimentDecision,
   getExperimentDecisions,
   groupExperimentsByAction,
-  isPaidExperiment
+  isPaidExperiment,
+  scoreBudgetCandidate
 } from "../src/domain/experiments";
 import { experiments } from "../src/data/demoData";
 
@@ -108,5 +110,43 @@ describe("experiment decision learning log", () => {
       "decision-new",
       "decision-old"
     ]);
+  });
+});
+
+describe("budget allocation scoring", () => {
+  it("prioritizes confident winners over weak stopped experiments", () => {
+    const winner = experiments.find((experiment) => experiment.id === "exp-local-caption");
+    const weak = experiments.find((experiment) => experiment.id === "exp-design-carousel");
+
+    expect(winner).toBeDefined();
+    expect(weak).toBeDefined();
+    expect(scoreBudgetCandidate(winner!).score).toBeGreaterThan(scoreBudgetCandidate(weak!).score);
+    expect(scoreBudgetCandidate(weak!).score).toBe(0);
+  });
+
+  it("builds comparable scenarios that allocate the full monthly budget", () => {
+    const scenarios = buildBudgetAllocationScenarios(experiments, 300);
+    const evidence = scenarios.find((scenario) => scenario.id === "evidence");
+    const learning = scenarios.find((scenario) => scenario.id === "learning");
+
+    expect(scenarios).toHaveLength(2);
+    expect(evidence).toBeDefined();
+    expect(learning).toBeDefined();
+    expect(evidence!.allocations.reduce((sum, allocation) => sum + allocation.amount, 0)).toBe(300);
+    expect(learning!.allocations.reduce((sum, allocation) => sum + allocation.amount, 0)).toBe(300);
+    expect(evidence!.allocations.find((allocation) => allocation.experimentId === "exp-design-carousel")?.amount).toBe(0);
+    expect(evidence!.allocations.find((allocation) => allocation.experimentId === "exp-local-caption")?.amount).toBeGreaterThan(
+      evidence!.allocations.find((allocation) => allocation.experimentId === "exp-gift-bundle")?.amount ?? 0
+    );
+    expect(learning!.allocations.find((allocation) => allocation.experimentId === "exp-gift-bundle")?.amount).toBeGreaterThan(
+      evidence!.allocations.find((allocation) => allocation.experimentId === "exp-gift-bundle")?.amount ?? 0
+    );
+  });
+
+  it("keeps rounded allocations non-negative for small scenario budgets", () => {
+    const [scenario] = buildBudgetAllocationScenarios(experiments, 25);
+
+    expect(scenario.allocations.reduce((sum, allocation) => sum + allocation.amount, 0)).toBe(25);
+    expect(scenario.allocations.every((allocation) => allocation.amount >= 0)).toBe(true);
   });
 });

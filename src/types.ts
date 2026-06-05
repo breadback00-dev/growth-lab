@@ -69,6 +69,32 @@ export interface ExperimentDecision {
   nextExperimentIdea: string;
 }
 
+export type BudgetScenarioStrategy = "evidence" | "learning";
+
+export interface BudgetCandidateScore {
+  experimentId: string;
+  decision: NextAction;
+  score: number;
+  rationale: string;
+}
+
+export interface BudgetAllocation {
+  experimentId: string;
+  amount: number;
+  score: number;
+  estimatedContribution: number;
+  rationale: string;
+}
+
+export interface BudgetScenario {
+  id: BudgetScenarioStrategy;
+  name: string;
+  summary: string;
+  budget: number;
+  estimatedContribution: number;
+  allocations: BudgetAllocation[];
+}
+
 export interface AudienceSegment {
   id: string;
   name: string;

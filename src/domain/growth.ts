@@ -1,4 +1,4 @@
-import type { MonthlySales } from "../types";
+import type { BudgetScenario, MonthlySales } from "../types";
 
 export interface GrowthResult {
   thresholdRevenue: number;
@@ -52,4 +52,33 @@ export function selectSalesMonth(months: MonthlySales[], monthName: string): Mon
 
 export function formatMoney(value: number): string {
   return `GBP ${Math.round(value).toLocaleString("en-GB")}`;
+}
+
+export function calculateScenarioThresholdImpact(
+  month: MonthlySales,
+  scenario: BudgetScenario
+) {
+  const currentGrowth = calculateGrowth(month);
+  const projectedRevenue = month.currentRevenue + scenario.estimatedContribution;
+  const projectedGrowth = calculateGrowth({
+    ...month,
+    currentRevenue: projectedRevenue
+  });
+
+  return {
+    thresholdRevenue: currentGrowth.thresholdRevenue,
+    currentGapToThreshold: Math.max(0, currentGrowth.thresholdRevenue - month.currentRevenue),
+    projectedGapToThreshold: Math.max(0, currentGrowth.thresholdRevenue - projectedRevenue),
+    projectedRevenue,
+    thresholdProgressPercent:
+      currentGrowth.thresholdRevenue === 0
+        ? 0
+        : (projectedRevenue / currentGrowth.thresholdRevenue) * 100,
+    thresholdProgressDelta:
+      currentGrowth.thresholdRevenue === 0
+        ? 0
+        : (scenario.estimatedContribution / currentGrowth.thresholdRevenue) * 100,
+    estimatedCommissionableRevenue: projectedGrowth.commissionableRevenue,
+    estimatedReward: projectedGrowth.reward
+  };
 }

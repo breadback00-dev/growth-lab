@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { calculateGrowth, selectSalesMonth, summarizeSales } from "../src/domain/growth";
+import {
+  calculateGrowth,
+  calculateScenarioThresholdImpact,
+  selectSalesMonth,
+  summarizeSales
+} from "../src/domain/growth";
 import { monthlySales } from "../src/data/demoData";
 
 describe("calculateGrowth", () => {
@@ -49,5 +54,35 @@ describe("selectSalesMonth", () => {
 
   it("falls back to the latest month when the requested month is absent", () => {
     expect(selectSalesMonth(monthlySales, "Nope").month).toBe("December");
+  });
+});
+
+describe("calculateScenarioThresholdImpact", () => {
+  it("estimates how proxy contribution changes threshold progress and upside", () => {
+    const impact = calculateScenarioThresholdImpact(
+      {
+        month: "Example",
+        monthIndex: 1,
+        previousYearRevenue: 1000,
+        currentRevenue: 1190,
+        isSeasonalPeak: false
+      },
+      {
+        id: "evidence",
+        name: "Evidence-led scale",
+        summary: "Proxy scenario",
+        budget: 100,
+        estimatedContribution: 100,
+        allocations: []
+      }
+    );
+
+    expect(impact.thresholdRevenue).toBe(1250);
+    expect(impact.currentGapToThreshold).toBe(60);
+    expect(impact.projectedGapToThreshold).toBe(0);
+    expect(impact.projectedRevenue).toBe(1290);
+    expect(impact.thresholdProgressDelta).toBe(8);
+    expect(impact.estimatedCommissionableRevenue).toBe(40);
+    expect(impact.estimatedReward).toBe(6);
   });
 });

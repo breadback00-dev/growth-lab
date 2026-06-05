@@ -21,6 +21,7 @@ export default function App() {
   const {
     state,
     replaceMonthlySales,
+    recordExperimentDecision,
     resetToDemo,
     setWeeklyActionStatus,
     updatePlanMonth,
@@ -59,7 +60,9 @@ export default function App() {
       <ExperimentsPage
         audiences={audiences}
         creativeAssets={creativeAssets}
+        decisions={state.experimentDecisions}
         experiments={state.experiments}
+        onRecordDecision={recordExperimentDecision}
         onSaveExperiment={upsertExperiment}
       />
     ),

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { experiments, monthlySales, planMonths } from "../data/demoData";
 import type {
   Experiment,
+  ExperimentDecision,
   GrowthLabState,
   MonthlySales,
   PlanMonth,
@@ -15,6 +16,7 @@ export const demoState: GrowthLabState = {
   monthlySales,
   planMonths,
   experiments,
+  experimentDecisions: [],
   weeklyActions: []
 };
 
@@ -37,6 +39,9 @@ function normalizeGrowthLabState(value: GrowthLabState): GrowthLabState {
     monthlySales: value.monthlySales,
     planMonths: value.planMonths,
     experiments: value.experiments,
+    experimentDecisions: Array.isArray(value.experimentDecisions)
+      ? value.experimentDecisions
+      : [],
     weeklyActions: Array.isArray(value.weeklyActions) ? value.weeklyActions : []
   };
 }
@@ -121,6 +126,16 @@ export function useGrowthLabState() {
     []
   );
 
+  const recordExperimentDecision = useCallback((decision: ExperimentDecision) => {
+    setState((current) => ({
+      ...current,
+      experimentDecisions: [
+        decision,
+        ...current.experimentDecisions.filter((item) => item.id !== decision.id)
+      ]
+    }));
+  }, []);
+
   const resetToDemo = useCallback(() => {
     window.localStorage.removeItem(STORAGE_KEY);
     setState(demoState);
@@ -132,11 +147,13 @@ export function useGrowthLabState() {
       upsertExperiment,
       updatePlanMonth,
       replaceMonthlySales,
+      recordExperimentDecision,
       setWeeklyActionStatus,
       resetToDemo
     }),
     [
       replaceMonthlySales,
+      recordExperimentDecision,
       resetToDemo,
       setWeeklyActionStatus,
       state,

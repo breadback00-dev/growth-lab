@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { classifyExperiment, groupExperimentsByAction, progressToTarget } from "../domain/experiments";
+import {
+  classifyExperiment,
+  createExperimentDecision,
+  getExperimentDecisions,
+  groupExperimentsByAction,
+  progressToTarget
+} from "../domain/experiments";
 import { formatMoney } from "../domain/growth";
 import type {
   AudienceSegment,
@@ -7,6 +13,7 @@ import type {
   Confidence,
   CreativeAsset,
   Experiment,
+  ExperimentDecision,
   ExperimentStatus,
   NextAction
 } from "../types";
@@ -14,7 +21,9 @@ import type {
 interface ExperimentsPageProps {
   audiences: AudienceSegment[];
   creativeAssets: CreativeAsset[];
+  decisions: ExperimentDecision[];
   experiments: Experiment[];
+  onRecordDecision: (decision: ExperimentDecision) => void;
   onSaveExperiment: (experiment: Experiment) => void;
 }
 
@@ -22,6 +31,7 @@ const actionOrder: NextAction[] = ["scale", "iterate", "launch", "stop"];
 const channels: ChannelType[] = ["organic", "paid", "email", "retail"];
 const statuses: ExperimentStatus[] = ["planned", "running", "complete"];
 const confidenceLevels: Confidence[] = ["low", "medium", "high"];
+type DecisionDraft = { reasoning: string; nextExperimentIdea: string };
 
 function createDraft(audiences: AudienceSegment[], creativeAssets: CreativeAsset[]): Experiment {
   return {
@@ -45,10 +55,13 @@ function createDraft(audiences: AudienceSegment[], creativeAssets: CreativeAsset
 export default function ExperimentsPage({
   audiences,
   creativeAssets,
+  decisions,
   experiments,
+  onRecordDecision,
   onSaveExperiment
 }: ExperimentsPageProps) {
   const [draft, setDraft] = useState<Experiment>(() => createDraft(audiences, creativeAssets));
+  const [decisionDrafts, setDecisionDrafts] = useState<Record<string, DecisionDraft>>({});
   const groups = groupExperimentsByAction(experiments);
 
   const updateDraft = <Key extends keyof Experiment>(key: Key, value: Experiment[Key]) => {
@@ -59,6 +72,39 @@ export default function ExperimentsPage({
     const nextAction = classifyExperiment(draft);
     onSaveExperiment({ ...draft, nextAction });
     setDraft(createDraft(audiences, creativeAssets));
+  };
+
+  const updateDecisionDraft = (
+    experimentId: string,
+    updates: Partial<DecisionDraft>
+  ) => {
+    setDecisionDrafts((current) => ({
+      ...current,
+      [experimentId]: {
+        reasoning: current[experimentId]?.reasoning ?? "",
+        nextExperimentIdea: current[experimentId]?.nextExperimentIdea ?? "",
+        ...updates
+      }
+    }));
+  };
+
+  const saveDecision = (experiment: Experiment) => {
+    const decisionDraft = decisionDrafts[experiment.id] ?? {
+      reasoning: "",
+      nextExperimentIdea: ""
+    };
+
+    onRecordDecision(
+      createExperimentDecision({
+        experiment,
+        reasoning: decisionDraft.reasoning,
+        nextExperimentIdea: decisionDraft.nextExperimentIdea
+      })
+    );
+    setDecisionDrafts((current) => ({
+      ...current,
+      [experiment.id]: { reasoning: "", nextExperimentIdea: "" }
+    }));
   };
 
   return (
@@ -230,6 +276,12 @@ export default function ExperimentsPage({
               const audience = audiences.find((item) => item.id === experiment.audienceId);
               const asset = creativeAssets.find((item) => item.id === experiment.creativeAssetId);
               const progress = Math.round(progressToTarget(experiment) * 100);
+              const decision = classifyExperiment(experiment);
+              const history = getExperimentDecisions(experiment.id, decisions);
+              const decisionDraft = decisionDrafts[experiment.id] ?? {
+                reasoning: "",
+                nextExperimentIdea: ""
+              };
 
               return (
                 <article className="experiment-card" key={experiment.id}>
@@ -255,8 +307,9 @@ export default function ExperimentsPage({
                   </dl>
                   <p className="result-note">{experiment.resultNote}</p>
                   <div className="button-row">
-                    <span className={`status-pill ${classifyExperiment(experiment)}`}>
-                      {classifyExperiment(experiment)}
+                    <span className={`status-pill ${decision}`}>{decision}</span>
+                    <span className="inline-tag">
+                      {history.length} learning{history.length === 1 ? "" : "s"}
                     </span>
                     <button
                       className="secondary-button"
@@ -266,6 +319,67 @@ export default function ExperimentsPage({
                       Edit
                     </button>
                   </div>
+                  {history.length > 0 ? (
+                    <div className="learning-log">
+                      <span className="agenda-label">Learning history</span>
+                      {history.map((entry) => (
+                        <article className="learning-entry" key={entry.id}>
+                          <div className="learning-entry-top">
+                            <span className={`decision ${entry.decision}`}>
+                              {entry.decision}
+                            </span>
+                            <time dateTime={entry.decidedAt}>
+                              {new Date(entry.decidedAt).toLocaleDateString("en-GB", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric"
+                              })}
+                            </time>
+                          </div>
+                          <p>{entry.reasoning}</p>
+                          <strong>{entry.nextExperimentIdea}</strong>
+                        </article>
+                      ))}
+                    </div>
+                  ) : null}
+                  <details className="inline-editor decision-editor">
+                    <summary>Record decision</summary>
+                    <label>
+                      Reasoning
+                      <textarea
+                        value={decisionDraft.reasoning}
+                        onChange={(event) =>
+                          updateDecisionDraft(experiment.id, {
+                            reasoning: event.target.value
+                          })
+                        }
+                        placeholder={`Why ${decision} this experiment?`}
+                      />
+                    </label>
+                    <label>
+                      Next experiment idea
+                      <textarea
+                        value={decisionDraft.nextExperimentIdea}
+                        onChange={(event) =>
+                          updateDecisionDraft(experiment.id, {
+                            nextExperimentIdea: event.target.value
+                          })
+                        }
+                        placeholder="What should the operator test or change next?"
+                      />
+                    </label>
+                    <button
+                      className="primary-button"
+                      disabled={
+                        decisionDraft.reasoning.trim().length === 0 ||
+                        decisionDraft.nextExperimentIdea.trim().length === 0
+                      }
+                      onClick={() => saveDecision(experiment)}
+                      type="button"
+                    >
+                      Save learning
+                    </button>
+                  </details>
                 </article>
               );
             })}

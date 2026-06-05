@@ -60,6 +60,15 @@ export interface Experiment {
   resultNote: string;
 }
 
+export interface ExperimentDecision {
+  id: string;
+  experimentId: string;
+  decision: NextAction;
+  decidedAt: string;
+  reasoning: string;
+  nextExperimentIdea: string;
+}
+
 export interface AudienceSegment {
   id: string;
   name: string;
@@ -114,5 +123,6 @@ export interface GrowthLabState {
   monthlySales: MonthlySales[];
   planMonths: PlanMonth[];
   experiments: Experiment[];
+  experimentDecisions: ExperimentDecision[];
   weeklyActions: WeeklyAction[];
 }

@@ -84,12 +84,19 @@ export default function App() {
         onSaveExperiment={upsertExperiment}
       />
     ),
-    audiences: <AudiencesPage audiences={audiences} />,
+    audiences: (
+      <AudiencesPage
+        audiences={audiences}
+        assets={creativeAssets}
+        experiments={state.experiments}
+      />
+    ),
     creative: (
       <CreativePage
         audiences={audiences}
         assets={creativeAssets}
         brand={brandProfile}
+        experiments={state.experiments}
       />
     ),
     recommendations: (

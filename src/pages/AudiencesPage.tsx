@@ -1,10 +1,20 @@
-import type { AudienceSegment } from "../types";
+import { useMemo } from "react";
+import AudienceCreativeMatrix from "../components/AudienceCreativeMatrix";
+import { buildAudienceCreativeMatrix } from "../domain/experiments";
+import type { AudienceSegment, CreativeAsset, Experiment } from "../types";
 
 interface AudiencesPageProps {
   audiences: AudienceSegment[];
+  assets: CreativeAsset[];
+  experiments: Experiment[];
 }
 
-export default function AudiencesPage({ audiences }: AudiencesPageProps) {
+export default function AudiencesPage({ audiences, assets, experiments }: AudiencesPageProps) {
+  const matrixRows = useMemo(
+    () => buildAudienceCreativeMatrix({ audiences, creativeAssets: assets, experiments }),
+    [assets, audiences, experiments]
+  );
+
   return (
     <div className="page-stack">
       <header className="page-header">
@@ -17,6 +27,8 @@ export default function AudiencesPage({ audiences }: AudiencesPageProps) {
           </p>
         </div>
       </header>
+
+      <AudienceCreativeMatrix assets={assets} rows={matrixRows} />
 
       <section className="audience-grid">
         {audiences.map((audience) => (
